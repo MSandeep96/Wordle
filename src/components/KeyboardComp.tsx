@@ -5,8 +5,10 @@ const pridi = Pridi({ weight: "600", subsets: ["latin"] });
 
 export const KeyboardComp = ({
   handleKeyPress,
+  letterMap,
 }: {
   handleKeyPress: ({ key }: { key: string }) => void;
+  letterMap: Record<string, number>;
 }): ReactElement => {
   const keyBoard = [
     ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
@@ -14,18 +16,27 @@ export const KeyboardComp = ({
     ["z", "x", "c", "v", "b", "n", "m"],
   ];
 
-  const getButton = (letter: string, stretch: boolean = false) => (
-    <button
-      className={
-        "bg-gray-800 rounded-md text-sm basis-10 capitalize py-4" +
-        (stretch ? " flex-auto" : "")
-      }
-      key={letter}
-      onClick={() => handleKeyPress({ key: letter })}
-    >
-      {letter}
-    </button>
-  );
+  const getButton = (letter: string, stretch: boolean = false) => {
+    let bgColor = "bg-gray-800";
+    if (letterMap[letter] === 1) {
+      bgColor = "bg-yellow-500";
+    } else if (letterMap[letter] === 2) {
+      bgColor = "bg-green-500";
+    } else if (letterMap[letter] === -1) {
+      bgColor = "bg-gray-900";
+    }
+    return (
+      <button
+        className={`${bgColor} rounded-md text-sm basis-10 capitalize py-4 ${
+          stretch ? " flex-auto" : ""
+        }`}
+        key={letter}
+        onClick={() => handleKeyPress({ key: letter })}
+      >
+        {letter}
+      </button>
+    );
+  };
 
   return (
     <div className="grid grid-rows-3 gap-2 mt-4 px-2 w-full max-w-lg font-bold">

@@ -5,17 +5,50 @@ import { WordGrid } from "../components/WordGrid";
 import { GuessWord } from "../ctx/GuessWord";
 import { getRandomWord, isWord } from "../lib/wordMap";
 
+const initLetterMap: Record<string, number> = {};
+[
+  "a",
+  "b",
+  "c",
+  "d",
+  "e",
+  "f",
+  "g",
+  "h",
+  "i",
+  "j",
+  "k",
+  "l",
+  "m",
+  "n",
+  "o",
+  "p",
+  "q",
+  "r",
+  "s",
+  "t",
+  "u",
+  "v",
+  "w",
+  "x",
+  "y",
+  "z",
+].map((l) => (initLetterMap[l] = 0));
+
 export default function Home() {
   const [guessWord, setGuessWord] = useState<string>(getRandomWord());
   const [entries, setEntries] = useState<string[]>([]);
   const [currEntry, setCurrEntry] = useState<string>("");
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
+  const [letterMap, setLetterMap] =
+    useState<Record<string, number>>(initLetterMap);
 
   const newGame = useCallback(() => {
     setGuessWord(getRandomWord());
     setEntries([]);
     setCurrEntry("");
     setIsGameOver(false);
+    setLetterMap(initLetterMap);
   }, []);
 
   const handleKeyPress = useCallback(
@@ -27,6 +60,20 @@ export default function Home() {
       } else if (key === "Enter") {
         if (currEntry.length !== 5) return;
         if (isWord(currEntry)) {
+          let lmCopy = { ...letterMap };
+          currEntry.split("").map((l, i) => {
+            let temp = lmCopy[l];
+            if (guessWord.includes(l)) {
+              temp = Math.max(temp, 1);
+              if (guessWord[i] === l) {
+                temp = 2;
+              }
+            } else {
+              temp = -1;
+            }
+            lmCopy[l] = temp;
+          });
+          setLetterMap(lmCopy);
           setEntries([...entries, currEntry]);
           setCurrEntry("");
         }
@@ -65,7 +112,7 @@ export default function Home() {
               You Suck
             </div>
           )}
-          <KeyboardComp handleKeyPress={handleKeyPress} />
+          <KeyboardComp handleKeyPress={handleKeyPress} letterMap={letterMap} />
         </main>
       </div>
     </GuessWord.Provider>
