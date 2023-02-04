@@ -5,6 +5,7 @@ import { WordGrid } from "../components/WordGrid";
 import { GuessWord } from "../ctx/GuessWord";
 import { getRandomWord, isWord } from "../lib/wordMap";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
+import Image from "next/image";
 
 const initLetterMap: Record<string, number> = {};
 "abcdefghijklmnopqrstuvwxyz".split("").map((l) => (initLetterMap[l] = 0));
@@ -16,6 +17,7 @@ export default function Home() {
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const [letterMap, setLetterMap] =
     useState<Record<string, number>>(initLetterMap);
+  const [isError, setIsError] = useState<boolean>(false);
 
   const newGame = useCallback(() => {
     setGuessWord(getRandomWord());
@@ -33,24 +35,27 @@ export default function Home() {
         setCurrEntry(currEntry.slice(0, -1));
       } else if (key === "Enter") {
         if (currEntry.length !== 5) return;
-        if (isWord(currEntry)) {
-          let lmCopy = { ...letterMap };
-          currEntry.split("").map((l, i) => {
-            let temp = lmCopy[l];
-            if (guessWord.includes(l)) {
-              temp = Math.max(temp, 1);
-              if (guessWord[i] === l) {
-                temp = 2;
-              }
-            } else {
-              temp = -1;
-            }
-            lmCopy[l] = temp;
-          });
-          setLetterMap(lmCopy);
-          setEntries([...entries, currEntry]);
-          setCurrEntry("");
+        if (!isWord(currEntry)) {
+          setIsError(true);
+          setTimeout(() => setIsError(false), 1000);
+          return;
         }
+        let lmCopy = { ...letterMap };
+        currEntry.split("").map((l, i) => {
+          let temp = lmCopy[l];
+          if (guessWord.includes(l)) {
+            temp = Math.max(temp, 1);
+            if (guessWord[i] === l) {
+              temp = 2;
+            }
+          } else {
+            temp = -1;
+          }
+          lmCopy[l] = temp;
+        });
+        setLetterMap(lmCopy);
+        setEntries([...entries, currEntry]);
+        setCurrEntry("");
         if (currEntry === guessWord) {
           setIsGameOver(true);
           return;
@@ -104,6 +109,17 @@ export default function Home() {
               </AlertDialog.Content>
             </AlertDialog.Portal>
           </AlertDialog.Root>
+          <div
+            className={
+              `bg-black bg-opacity-30 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md ` +
+              (!isError ? "hidden" : "")
+            }
+          >
+            <img
+              src="https://media.tenor.com/RUJokzj0C2gAAAAC/speak-english-pulp-fiction.gif"
+              alt="Invalid word"
+            />
+          </div>
         </main>
       </div>
     </GuessWord.Provider>
