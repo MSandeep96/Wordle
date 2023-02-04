@@ -34,7 +34,7 @@ export const LetterBox = ({
   return (
     <input
       type="text"
-      className={`border-2 font-bold capitalize border-opacity-50 w-14 h-14 text-4xl text-center ${bgColor} ${borderColor}`}
+      className={`border-2 transition-all ease-in-out font-bold capitalize border-opacity-50 w-14 h-14 text-4xl text-center ${bgColor} ${borderColor}`}
       value={val}
       disabled
     />

@@ -4,36 +4,10 @@ import { KeyboardComp } from "../components/KeyboardComp";
 import { WordGrid } from "../components/WordGrid";
 import { GuessWord } from "../ctx/GuessWord";
 import { getRandomWord, isWord } from "../lib/wordMap";
+import * as AlertDialog from "@radix-ui/react-alert-dialog";
 
 const initLetterMap: Record<string, number> = {};
-[
-  "a",
-  "b",
-  "c",
-  "d",
-  "e",
-  "f",
-  "g",
-  "h",
-  "i",
-  "j",
-  "k",
-  "l",
-  "m",
-  "n",
-  "o",
-  "p",
-  "q",
-  "r",
-  "s",
-  "t",
-  "u",
-  "v",
-  "w",
-  "x",
-  "y",
-  "z",
-].map((l) => (initLetterMap[l] = 0));
+"abcdefghijklmnopqrstuvwxyz".split("").map((l) => (initLetterMap[l] = 0));
 
 export default function Home() {
   const [guessWord, setGuessWord] = useState<string>(getRandomWord());
@@ -86,7 +60,7 @@ export default function Home() {
         setCurrEntry(currEntry + key);
       }
     },
-    [currEntry, guessWord, isGameOver, entries]
+    [currEntry, guessWord, isGameOver, entries, letterMap]
   );
 
   useEffect(() => {
@@ -102,17 +76,34 @@ export default function Home() {
         <Header newGame={newGame} />
         <main className="flex flex-col flex-grow mt-4 items-center text-white">
           <WordGrid entries={entries} currEntry={currEntry} />
-          {isGameOver && (
-            <div className="bg-green-600 rounded-lg text-xs mt-4 px-2">
-              Game Over
-            </div>
-          )}
-          {entries.length === 6 && !isGameOver && (
-            <div className="bg-red-600 rounded-lg text-xs mt-4 px-2">
-              You Suck
-            </div>
-          )}
           <KeyboardComp handleKeyPress={handleKeyPress} letterMap={letterMap} />
+          <AlertDialog.Root open={entries.length === 6 || isGameOver}>
+            <AlertDialog.Portal>
+              <AlertDialog.Overlay className="bg-black bg-opacity-30 fixed inset-0" />
+              <AlertDialog.Content className="bg-white fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md p-6">
+                <AlertDialog.Title className="font-bold text-lg">
+                  {"You "}
+                  {isGameOver ? (
+                    <span className="text-green-400">Win!</span>
+                  ) : (
+                    <span className="text-red-400">Suck!</span>
+                  )}
+                </AlertDialog.Title>
+                <AlertDialog.Description className="font-thin mt-2">
+                  The word was{" "}
+                  <span className="font-bold uppercase">{`"${guessWord}"`}</span>
+                </AlertDialog.Description>
+                <div className="flex justify-center mt-4">
+                  <button
+                    className="bg-yellow-400 outline-none py-2 px-4 rounded-md hover:bg-yellow-500"
+                    onClick={newGame}
+                  >
+                    Ok
+                  </button>
+                </div>
+              </AlertDialog.Content>
+            </AlertDialog.Portal>
+          </AlertDialog.Root>
         </main>
       </div>
     </GuessWord.Provider>
